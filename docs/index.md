@@ -14,7 +14,7 @@ Reports:
 
 
 References Used:
-- [Stable Baselines3 DQN][https://stable-baselines3.readthedocs.io/en/master/modules/dqn.html]
-- [DeepMind Technologies DQN Paper][https://arxiv.org/pdf/1312.5602]
-- [Stanford 2048 Paper][https://arxiv.org/html/2507.05465v1]
-- [Medium 2048 Article][https://medium.com/data-science/a-puzzle-for-ai-eb7a3cb8e599]
+- [Stable Baselines3 DQN](https://stable-baselines3.readthedocs.io/en/master/modules/dqn.html)
+- [DeepMind Technologies DQN Paper](https://arxiv.org/pdf/1312.5602)
+- [Stanford 2048 Paper](https://arxiv.org/html/2507.05465v1)
+- [Medium 2048 Article](https://medium.com/data-science/a-puzzle-for-ai-eb7a3cb8e599)
