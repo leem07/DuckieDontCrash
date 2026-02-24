@@ -876,15 +876,44 @@ L_value = 0.5 · E[ (Rᵢ − V_φ(sᵢ))² ]</div>
       <h2 class="section-title">Remaining Goals</h2>
     </div>
     <div class="section-body">
-      <p>Work remaining before the final submission:</p>
-      <div class="goals-list" style="margin-top: 20px;">
-        <div class="goal-item"><span class="goal-dot pending"></span>Implement DQN illegal-move masking wrapper and rerun hyperparameter tuning</div>
-        <div class="goal-item"><span class="goal-dot pending"></span>Finalize hyperparameter tuning for both PPO and DQN models</div>
-        <div class="goal-item"><span class="goal-dot pending"></span>Generate learning curve visualizations (score and max tile over episodes)</div>
-        <div class="goal-item"><span class="goal-dot pending"></span>Produce Q-value heatmaps for DQN to interpret reward prioritization</div>
-        <div class="goal-item"><span class="goal-dot pending"></span>Run head-to-head comparison across identical evaluation episodes</div>
-        <div class="goal-item"><span class="goal-dot pending"></span>Write qualitative analysis of emergent strategies per model</div>
+
+      <div class="sub-heading">Model Improvements</div>
+      <div class="goals-list">
+        <div class="goal-item"><span class="goal-dot pending"></span>Implement DQN illegal-move masking wrapper and rerun hyperparameter tuning — the model currently gets stuck on repeated illegal moves, and masking them at the action selection stage is a prerequisite for any meaningful further tuning.</div>
+        <div class="goal-item"><span class="goal-dot pending"></span>Finalize hyperparameter tuning for both PPO and DQN, targeting a DQN that reaches its expected max-tile outcome regularly and a PPO that achieves 2048 with some degree of consistency.</div>
       </div>
+
+      <div class="sub-heading">Empirical Evidence</div>
+      <div class="goals-list">
+        <div class="goal-item"><span class="goal-dot pending"></span>Generate learning curve visualizations — score and max tile plotted over episodes — to demonstrate how each model improves over training time and identify where learning plateaus.</div>
+        <div class="goal-item"><span class="goal-dot pending"></span>Produce Q-value heatmaps for DQN to visualize which board states the model values most highly, making its reward prioritization interpretable.</div>
+        <div class="goal-item"><span class="goal-dot pending"></span>Run a head-to-head comparison across identical evaluation episodes, storing the max tile reached per episode for each model so performance curves can be directly compared.</div>
+        <div class="goal-item"><span class="goal-dot pending"></span>Gather broader empirical statistics comparing other published models' score and max-tile results against ours, time permitting.</div>
+      </div>
+
+      <div class="sub-heading">Search Algorithm Baselines</div>
+      <p>
+        We are interested in evaluating our trained models against two classical search algorithms that are known to perform well on 2048:
+      </p>
+      <div class="goals-list" style="margin-bottom: 24px;">
+        <div class="goal-item"><span class="goal-dot pending"></span><strong>MCTS (Monte Carlo Tree Search)</strong> — simulates many possible future game trajectories from the current state and backpropagates value estimates up the search tree. Its strength lies in long-term planning through simulation, which maps naturally onto 2048's need to build toward high tiles over many moves.</div>
+        <div class="goal-item"><span class="goal-dot pending"></span><strong>Expectimax</strong> — maximizes over all possible player actions while computing the expectation over stochastic tile spawns (90% chance of a 2, 10% chance of a 4). It handles the game's randomness explicitly, making it a direct model of the decision problem rather than a learned approximation.</div>
+      </div>
+      <p>
+        Both algorithms handle delayed rewards by construction — MCTS through rollout depth, Expectimax through explicit lookahead — making them a meaningful comparison point for our RL models, which must learn to handle delayed rewards implicitly through training. Comparing against them would contextualize how close our learned policies come to search-quality play.
+      </p>
+
+      <div class="sub-heading">Challenges</div>
+      <div class="bug-card" style="margin-top: 4px;">
+        <div class="bug-header">
+          <span class="bug-tag issue">Challenge</span>
+          <span class="bug-title">Training Time vs. Hyperparameter Coverage</span>
+        </div>
+        <p class="bug-body">
+          DQN training runs currently take 30–60 minutes each, and every hyperparameter adjustment requires a full rerun. As the final submission approaches, exhaustive tuning becomes infeasible within the available time budget. We may need to reduce certain hyperparameters (buffer size, timesteps) to shorten individual runs — but smaller training budgets risk producing undertrained models whose performance may not reflect what a fully scaled run would achieve, complicating fair comparison against PPO.
+        </p>
+      </div>
+
     </div>
   </div>
 
