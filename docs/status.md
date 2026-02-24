@@ -50,3 +50,9 @@ Some things we still need to implement are DQN wrappers, hyperparameter tuning, 
 - [Medium 2048 Article](https://medium.com/data-science/a-puzzle-for-ai-eb7a3cb8e599)
 - [CS175 Slides](https://royf.org/crs/CS175/W26/CS175L2.pdf)
 - Claude/Google Gemini
+
+## AI Disclaimer
+AI was used to:
+- integrate libraries/dependencies
+- create frontend design for GitHub Pages
+- supplement personal learning of RL models
