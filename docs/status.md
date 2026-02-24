@@ -4,7 +4,7 @@ title: Status
 ---
 
 ## Project Summary
-In this project, we train three different models using three different approaches and compare the performance of each model on the game 2048. Specifically, we use PPO and DQN, then compare which model gets the furthest (indicated by the highest number and total score) in the game, as well as the strengths and weaknesses of each model in 2048.
+In this project, we train two different models using three different approaches and compare the performance of each model on the game 2048. Specifically, we use PPO and DQN, then compare which model gets the furthest (indicated by the highest number and total score) in the game, as well as the strengths and weaknesses of each model in 2048.
 
 ## Approach
 ### DQN
@@ -49,7 +49,6 @@ Some things we still need to implement are DQN wrappers, hyperparameter tuning, 
 - [Stanford 2048 Paper](https://arxiv.org/html/2507.05465v1)
 - [Medium 2048 Article](https://medium.com/data-science/a-puzzle-for-ai-eb7a3cb8e599)
 - [CS175 Slides](https://royf.org/crs/CS175/W26/CS175L2.pdf)
-- Claude/Google Gemini
 
 ## AI Disclaimer
 AI was used to:
