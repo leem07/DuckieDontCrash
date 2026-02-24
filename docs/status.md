@@ -31,3 +31,9 @@ Unfortunately, with the default DQN environment, the model does not learn to avo
 ## Remaining Goals and Challenges
 
 ## Resources Used
+- [2048 GitHub Repository](https://github.com/Quentin18/gymnasium-2048/blob/main/README.md)
+- [Stable Baselines3 DQN](https://stable-baselines3.readthedocs.io/en/master/modules/dqn.html)
+- [DeepMind Technologies DQN Paper](https://arxiv.org/pdf/1312.5602)
+- [Stanford 2048 Paper](https://arxiv.org/html/2507.05465v1)
+- [Medium 2048 Article](https://medium.com/data-science/a-puzzle-for-ai-eb7a3cb8e599)
+- Claude/Google Gemini
