@@ -51,8 +51,8 @@ title: Proposal
 
   .breadcrumb {
     font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.25em;
+    font-size: 13px;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--muted);
     margin-bottom: 24px;
@@ -79,7 +79,7 @@ title: Proposal
   }
 
   .page-header p {
-    font-size: 16px;
+    font-size: 18px;
     color: var(--muted);
     max-width: 520px;
     line-height: 1.7;
@@ -113,8 +113,8 @@ title: Proposal
 
   .section-num {
     font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.25em;
+    font-size: 13px;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--accent);
     margin-bottom: 12px;
@@ -132,7 +132,7 @@ title: Proposal
   }
 
   .section-title {
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 800;
     letter-spacing: -0.01em;
     line-height: 1.2;
@@ -141,8 +141,8 @@ title: Proposal
   }
 
   .section-body {
-    font-size: 15px;
-    line-height: 1.85;
+    font-size: 17px;
+    line-height: 1.9;
     color: #4a4a44;
   }
 
@@ -278,7 +278,7 @@ title: Proposal
 
   .doc-nav a {
     font-family: 'Space Mono', monospace;
-    font-size: 11px;
+    font-size: 13px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     color: var(--muted);
