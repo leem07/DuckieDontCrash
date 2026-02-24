@@ -606,105 +606,81 @@ title: Status
     </div>
     <div class="section-body">
       <p>
-        The PPO model uses a custom-built environment and training loop with a <strong>CNN + MLP dual-path architecture</strong>. The policy network takes the 4×4 board as input — log2-encoded and passed through both a convolutional spatial path and a flattened MLP path — then outputs a probability distribution over the four possible moves.
+        The PPO model uses a fully custom training loop with a <strong>CNN + MLP dual-path architecture</strong>. Unlike DQN's off-policy Q-value approach, PPO is an on-policy actor-critic method that directly optimizes a clipped surrogate objective, preventing destructively large policy updates while still making meaningful gradient steps each iteration.
       </p>
-      <div class="sub-heading">Algorithm Overview</div>
 
-<p>
-  The agent is trained using <strong>Proximal Policy Optimization (PPO)</strong>, a policy-gradient reinforcement learning algorithm designed to provide stable and sample-efficient updates. PPO operates by repeatedly collecting trajectories of interaction data from the environment, storing them in a rollout buffer, and then performing multiple epochs of minibatch optimization over that fixed dataset. Each interaction step produces a tuple \( (s_t, a_t, r_t, s_{t+1}) \), where the state \( s_t \) corresponds to the log₂-encoded 4×4 board, the action \( a_t \) is one of four discrete moves, and the reward \( r_t \) comes from merge scores and shaping bonuses.
-</p>
+      <div class="sub-heading">Network Architecture</div>
+      <p>
+        The board is first <strong>log2-encoded</strong>: each tile value t is mapped to log₂(t) / 17, compressing the range 2–131072 into a uniform [0, 1] scale. This encoded board is then processed by two parallel paths:
+      </p>
+      <div class="hyperparam-grid" style="margin-bottom: 20px;">
+        <div class="hyperparam-item"><span class="hyperparam-key">Spatial path (Conv2d)</span><span class="hyperparam-val">1→64→128→128 channels</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">Flat path (MLP)</span><span class="hyperparam-val">16→256→256</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">Combined head</span><span class="hyperparam-val">1408→512→256→4</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">Value head output</span><span class="hyperparam-val">1408→512→256→1</span></div>
+      </div>
+      <p>
+        The convolutional path sees the board spatially as a (1, 4, 4) image, learning positional tile relationships such as corner anchoring and adjacency. The flat MLP path provides global context over all 16 cells simultaneously. Their outputs are concatenated and passed to separate policy and value heads.
+      </p>
 
-<p>
-  The policy network outputs a probability distribution \( \pi_\theta(a \mid s) \), while a separate value network estimates \( V_\phi(s) \). PPO improves the policy by maximizing a clipped surrogate objective that prevents destructive policy updates:
-</p>
+      <div class="sub-heading">Reward Function</div>
+      <p>The shaped reward for each step combines four components:</p>
+      <div class="formula-block">
+r = log₂(merge_score + 1)
+  + 0.30 · log₂(max_tile + 1)   [if max_tile is in a corner]
+  + 0.10 · empty_cells
+  − 0.05 · monotonicity_penalty</div>
+      <p>
+        The base term <strong>log₂(merge_score + 1)</strong> is scale-invariant — merging two 512 tiles (score 1024) yields log₂(1025) ≈ 10, while merging two 2 tiles (score 4) yields log₂(5) ≈ 2.3, a proportional difference rather than a 256× raw difference. The monotonicity penalty accumulates log₂ differences across adjacent tile pairs that violate ascending order in any row or column:
+      </p>
+      <div class="formula-block">
+mono = Σ_{rows} Σ_{j} max(0, log₂(row[j]) − log₂(row[j+1]))
+     + Σ_{cols} Σ_{i} max(0, log₂(col[i]) − log₂(col[i+1]))</div>
 
-<div class="formula-block">
-  \( L^{\text{PPO}}(\theta) =
-  \mathbb{E}_t \Big[
-    \min \Big(
-      r_t(\theta)\hat{A}_t,\;
-      \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t
-    \Big)
-  \Big] \)
-</div>
+      <div class="sub-heading">Generalized Advantage Estimation (GAE)</div>
+      <p>
+        Rather than using raw returns or single-step TD errors, advantages are computed via GAE with γ = 0.997 and λ = 0.95. Starting from the last step in the rollout buffer and working backwards:
+      </p>
+      <div class="formula-block">
+δᵢ    = rᵢ + γ · V(sᵢ₊₁) · (1 − doneᵢ) − V(sᵢ)
+Âᵢ    = δᵢ + γλ · (1 − doneᵢ) · Âᵢ₊₁
+Rᵢ    = Âᵢ + V(sᵢ)         [returns for value loss]</div>
+      <p>
+        δᵢ is the one-step TD error. GAE exponentially discounts future TD errors, controlled by λ: λ = 0 reduces to pure TD (low variance, high bias), λ = 1 reduces to full Monte Carlo (high variance, low bias). λ = 0.95 sits close to the Monte Carlo end, capturing long multi-step merge sequences without excessive variance. Advantages are then normalized across the batch: Â ← (Â − mean(Â)) / (std(Â) + ε).
+      </p>
 
-<p>where</p>
+      <div class="sub-heading">PPO Clipped Objective</div>
+      <p>
+        For each mini-batch, the probability ratio between the new and old policy is computed, then clipped to prevent large updates:
+      </p>
+      <div class="formula-block">
+r(θ) = π_θ(a|s) / π_θ_old(a|s)   =   exp(log π_θ(a|s) − log π_θ_old(a|s))
 
-<div class="formula-block">
-  \( r_t(\theta) =
-  \frac{\pi_\theta(a_t \mid s_t)}
-       {\pi_{\theta_{\text{old}}}(a_t \mid s_t)} \)
-</div>
+L_CLIP = E[ min(r(θ) · Â,  clip(r(θ), 1−ε, 1+ε) · Â) ]   where ε = 0.2
 
-<p>
-  and \( \hat{A}_t \) is the advantage estimate. The clipping term limits how far the policy can move during each update, preventing large shifts that could collapse previously learned behavior.
-</p>
+L_policy = −L_CLIP − 0.02 · H[π_θ]</div>
+      <p>
+        The entropy bonus <strong>H[π_θ]</strong> (coefficient 0.02) discourages premature convergence to a deterministic policy, keeping the agent exploring alternative move sequences throughout training. The value loss is computed separately:
+      </p>
+      <div class="formula-block">
+L_value = 0.5 · E[ (Rᵢ − V_φ(sᵢ))² ]</div>
 
-<p>
-  The value function is trained using a regression objective:
-</p>
+      <div class="sub-heading">Hyperparameters</div>
+      <div class="hyperparam-grid">
+        <div class="hyperparam-item"><span class="hyperparam-key">γ (discount)</span><span class="hyperparam-val">0.997</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">λ (GAE)</span><span class="hyperparam-val">0.95</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">ε (clip)</span><span class="hyperparam-val">0.2</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">policy_lr</span><span class="hyperparam-val">1e-4</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">value_lr</span><span class="hyperparam-val">5e-4</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">ppo_epochs</span><span class="hyperparam-val">8</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">mini_batch</span><span class="hyperparam-val">512</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">rollout_steps</span><span class="hyperparam-val">4096</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">entropy_coef</span><span class="hyperparam-val">0.02</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">value_coef</span><span class="hyperparam-val">0.5</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">max_grad_norm</span><span class="hyperparam-val">0.5</span></div>
+        <div class="hyperparam-item"><span class="hyperparam-key">LR schedule</span><span class="hyperparam-val">Cosine (T₀=2M)</span></div>
+      </div>
 
-<div class="formula-block">
-  \( L^{\text{value}}(\phi) =
-  \mathbb{E}_t \Big[
-    (V_\phi(s_t) - \hat{R}_t)^2
-  \Big] \)
-</div>
-
-<p>
-  where \( \hat{R}_t \) represents the bootstrapped return. An entropy bonus is added to encourage exploration:
-</p>
-
-<div class="formula-block">
-  \( L^{\text{entropy}}(\theta) =
-  \mathbb{E}_t \big[
-    \mathcal{H}(\pi_\theta(\cdot \mid s_t))
-  \big] \)
-</div>
-
-<p>
-  The final optimization objective combines these components:
-</p>
-
-<div class="formula-block">
-  \( L =
-  L^{\text{PPO}}
-  - c_1 L^{\text{value}}
-  + c_2 L^{\text{entropy}} \)
-</div>
-
-<p>
-  Advantage estimation uses <strong>Generalized Advantage Estimation (GAE)</strong>, which balances bias and variance:
-</p>
-
-<div class="formula-block">
-  \( \hat{A}_t =
-  \sum_{l=0}^{\infty}
-  (\gamma \lambda)^l \delta_{t+l} \)
-  <br><br>
-  \( \delta_t =
-  r_t + \gamma V(s_{t+1}) - V(s_t) \)
-</div>
-
-<p>
-  This produces smoother gradients and more stable learning compared to single-step or Monte Carlo returns.
-</p>
-
-<p>
-  In the case of 2048, the observation space is a deterministic 4×4 grid whose tile magnitudes vary exponentially. Direct numerical input would create poorly scaled features, so the board is log₂-encoded, compressing tile values into a compact range. The encoded board is processed by a dual-path architecture: a CNN branch captures spatial structure (adjacency, merge opportunities, monotonic gradients), while a parallel MLP branch models global board statistics. These feature streams are concatenated and mapped to a four-action categorical distribution.
-</p>
-
-<p>
-  The reward function uses \( r = \log_2(\text{merge\_score} + 1) \), stabilizing gradient variance, and is augmented with shaping bonuses encouraging corner anchoring, monotonicity, and maintaining empty cells. These shaping signals accelerate learning by providing dense feedback without altering the optimal policy.
-</p>
-
-<p>
-  Training proceeds using large rollout batches (4096 steps per update), ensuring gradient estimates reflect diverse board configurations. The buffer is shuffled into minibatches and optimized over multiple epochs to improve sample efficiency. Separate Adam optimizers are used for policy and value networks, while a cosine annealing schedule gradually reduces step sizes. Gradient clipping (norm ≤ 0.5) prevents rare high-reward transitions from destabilizing updates.
-</p>
-
-<p>
-  A reproducible configuration specifies parameters such as discount factor \( \gamma \) (typically 0.99), GAE parameter \( \lambda \) (often 0.95), PPO clipping coefficient \( \epsilon \) (commonly 0.1–0.2), minibatch size, optimization epochs, entropy coefficient, and value loss weight. These defaults follow established PPO literature (Schulman et al., 2016; 2017).
-</p>
       <div class="sub-heading">Key Design Choices</div>
       <div class="design-grid">
 
@@ -728,31 +704,31 @@ title: Status
           <span class="design-icon">03</span>
           <div class="design-content">
             <p class="design-title">Corner Placement Bonus</p>
-            <p class="design-desc">The agent receives a bonus when the maximum tile occupies a corner. Corner anchoring is a core human strategy: it enables cascading collapses where a sequence of moves merges multiple descending tiles in one sweep without displacing the highest tile.</p>
+            <p class="design-desc">The agent receives +0.30 · log₂(max_tile + 1) when the maximum tile occupies any corner. Corner anchoring enables cascading collapses — a sequence of moves that merges multiple descending tiles in one sweep without displacing the highest tile.</p>
           </div>
         </div>
 
         <div class="design-card">
           <span class="design-icon">04</span>
           <div class="design-content">
-            <p class="design-title">Monotonicity Bonus</p>
-            <p class="design-desc">Rewards moves that produce consistently increasing or decreasing tile values across rows and columns. Monotonic arrangements make multi-tile merges possible in a single move, dramatically compressing the board and freeing space for future tiles.</p>
+            <p class="design-title">Monotonicity Penalty</p>
+            <p class="design-desc">Penalizes moves that produce non-monotonic tile arrangements by accumulating log₂ differences across all adjacent tile pairs that violate ascending order. Monotonic rows and columns make multi-tile chain merges possible in a single move.</p>
           </div>
         </div>
 
         <div class="design-card">
           <span class="design-icon">05</span>
           <div class="design-content">
-            <p class="design-title">Empty Cell Bonus</p>
-            <p class="design-desc">A small bonus per empty cell encourages the agent to keep the board open. Fewer empty cells means fewer future moves are legal, accelerating game-over states. This bonus discourages the agent from filling the board prematurely.</p>
+            <p class="design-title">Empty Cell Bonus (+0.10 per cell)</p>
+            <p class="design-desc">A bonus per empty cell discourages filling the board prematurely. As empty cells decrease, legal moves decrease, accelerating game-over. This term keeps the agent actively seeking merge opportunities rather than spreading tiles.</p>
           </div>
         </div>
 
         <div class="design-card">
           <span class="design-icon">06</span>
           <div class="design-content">
-            <p class="design-title">Generalized Advantage Estimation (GAE)</p>
-            <p class="design-desc">GAE reduces variance in policy gradient updates by blending multi-step return estimates. Rather than using a single-step TD error or a full Monte Carlo return, GAE interpolates between them (via λ) to balance the tradeoff between bias and variance when estimating how good a specific action was relative to average policy behavior.</p>
+            <p class="design-title">GAE (γ=0.997, λ=0.95)</p>
+            <p class="design-desc">High γ (0.997) values future rewards heavily, critical for 2048 where the payoff of a strategic merge may not materialize for dozens of moves. λ=0.95 keeps advantage estimates close to Monte Carlo, capturing long multi-step merge sequences without excessive variance.</p>
           </div>
         </div>
 
@@ -760,31 +736,31 @@ title: Status
           <span class="design-icon">07</span>
           <div class="design-content">
             <p class="design-title">Large Rollout Buffer (4096 steps)</p>
-            <p class="design-desc">Collecting 4096 environment steps before each update ensures the policy gradient estimate is computed over a diverse batch of board states and action outcomes, reducing the influence of any single lucky or unlucky episode.</p>
+            <p class="design-desc">4096 steps spans multiple complete games, ensuring each policy update sees diverse board configurations including both early-game open boards and late-game crowded states. This prevents gradient updates from overfitting to one game's trajectory.</p>
           </div>
         </div>
 
         <div class="design-card">
           <span class="design-icon">08</span>
           <div class="design-content">
-            <p class="design-title">Mini-Batch PPO Updates</p>
-            <p class="design-desc">The rollout buffer is split into mini-batches for multiple epochs of gradient updates. The PPO clipping objective limits how much the policy can shift from its previous version per update, preventing destructive overshooting while still making meaningful progress each iteration.</p>
+            <p class="design-title">Mini-Batch PPO (8 epochs, batch 512)</p>
+            <p class="design-desc">The 4096-step buffer is shuffled and split into 512-sample mini-batches, updated for 8 epochs per rollout. The ε=0.2 clip limits the probability ratio r(θ) to [0.8, 1.2], preventing any single update from overshooting the policy into a bad region.</p>
           </div>
         </div>
 
         <div class="design-card">
           <span class="design-icon">09</span>
           <div class="design-content">
-            <p class="design-title">Separate Adam Optimizers + Cosine LR Schedule</p>
-            <p class="design-desc">Policy and value networks use independent Adam optimizers with different learning rates, allowing each to converge at its natural pace. A cosine annealing schedule with warm restarts reduces the learning rate over time, enabling fine-grained refinement after broad early exploration.</p>
+            <p class="design-title">Separate Adam Optimizers + Cosine LR</p>
+            <p class="design-desc">Policy (lr=1e-4) and value (lr=5e-4) networks use independent Adam optimizers — the value network uses a 5× higher rate since it has a cleaner regression target. Cosine annealing with warm restarts (T₀=2M steps) progressively reduces both rates while periodically resetting to escape local minima.</p>
           </div>
         </div>
 
         <div class="design-card">
           <span class="design-icon">10</span>
           <div class="design-content">
-            <p class="design-title">Gradient Clipping at 0.5</p>
-            <p class="design-desc">Gradient clipping prevents exploding gradients — cases where a single large update destabilizes previously learned weights. Without clipping, rare high-reward merges can produce gradient spikes that cause the policy to catastrophically forget strategies it had already learned.</p>
+            <p class="design-title">Gradient Clipping (max_norm=0.5)</p>
+            <p class="design-desc">Applied after each backward pass via torch.nn.utils.clip_grad_norm_. Without clipping, rare high-reward merges (e.g. creating a 1024 tile) produce gradient spikes that can catastrophically overwrite previously learned strategies in a single step.</p>
           </div>
         </div>
 
@@ -792,7 +768,7 @@ title: Status
           <span class="design-icon">11</span>
           <div class="design-content">
             <p class="design-title">Two Saved Checkpoints</p>
-            <p class="design-desc">Training maintains two separate checkpoints: the <em>latest</em> model (saved every 500 episodes and on every new best tile) and the <em>best average score</em> model (saved only when the 100-episode rolling average improves by more than 1%). This separates recency from quality for evaluation and further training.</p>
+            <p class="design-desc">The <em>latest</em> checkpoint saves every 500 episodes and on every new best tile. The <em>best-average</em> checkpoint saves only when the 100-episode rolling mean improves by more than 1%, preventing frequent overwrites from lucky individual games.</p>
           </div>
         </div>
 
