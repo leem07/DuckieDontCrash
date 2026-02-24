@@ -3,38 +3,18 @@ layout: default
 title:  Home
 ---
 
-Source code: https://github.com/USER/PROJECT (_fix this_)
+The game 2048 trained with DQN and PPO. Which one's better?
+
+Source code: https://github.com/leem07/PowerOf2
 
 Reports:
-
 - [Proposal](proposal.html)
 - [Status](status.html)
 - [Final](final.html)
 
-What's Markdown (`.md`)?
 
-Markdown is markup that lets you write hypertext (HTML) documents
-in easy-to-read and easy-to-write plain text.
-No angle brackets `<></>` required for
-paragraphs, lists, blockquotes, tables, etc.
-
-
-This is a paragraph (in Markdown). Some more
-text here.
-
-This is another paragraph.
-
-This is a list:
-
-- Orange
-- Apple
-- Blueberry
-
-$$x^2 = y^2$$
-
-
-Just getting started with Markdown?
-See the [HTML <-> Markdown Quick Reference (Cheat Sheet)][quickref].
-
-
-[quickref]: https://github.com/mundimark/quickrefs/blob/master/HTML.md
+References Used:
+- [Stable Baselines3 DQN][https://stable-baselines3.readthedocs.io/en/master/modules/dqn.html]
+- [DeepMind Technologies DQN Paper][https://arxiv.org/pdf/1312.5602]
+- [Stanford 2048 Paper][https://arxiv.org/html/2507.05465v1]
+- [Medium 2048 Article][https://medium.com/data-science/a-puzzle-for-ai-eb7a3cb8e599]
