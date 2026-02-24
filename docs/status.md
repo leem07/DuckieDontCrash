@@ -866,6 +866,7 @@ title: Status
         <div class="ai-tag-item">Integrate libraries and dependencies</div>
         <div class="ai-tag-item">Create frontend design for GitHub Pages</div>
         <div class="ai-tag-item">Supplement personal learning of RL models</div>
+        <div class="ai-tag-item">Create game GUI</div>
       </div>
     </div>
   </div>
