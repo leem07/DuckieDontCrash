@@ -19,6 +19,7 @@ The base code for the 2048 game uses random moves without any learning. We used 
 - batch_size=32
 - exploration_fraction=0.1
 - verbose=1
+
 with 
 - total_timesteps=5000
 
