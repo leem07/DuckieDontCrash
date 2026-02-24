@@ -344,6 +344,10 @@ title: Status
     z-index: 2;
   }
 
+  .eval-img-wrap.no-caption::after {
+    display: none;
+  }
+
   .eval-img-wrap img {
     display: block;
     width: 100%;
@@ -553,17 +557,19 @@ title: Status
     </div>
     <div class="section-body">
       <p>
-        One of the models we are training is a <strong>Deep Q-Network (DQN)</strong> using a Multilayer Perceptron policy. It takes the board state as input and selects actions (0–3, corresponding to up, down, left, right) based on the total score as the reward signal.
+        One of the models we are training is a <strong>Deep Q-Network (DQN)</strong> using a Multilayer Perceptron policy. DQN takes in a 4×4 2D array representing the board state, where <strong>0 represents empty cells</strong> and positive integers represent the power of 2 occupying that cell — for example, a cell with value 3 represents 2³ = 8. This encoded array is passed to a hidden MLP network that learns patterns correlated with high rewards, then outputs a discrete action (0–3, corresponding to up, down, left, right) based on the estimated Q-value for each action.
+      </p>
+      <p>
+        After making the selected move, the transition is stored in a <strong>replay buffer</strong>. During training, DQN samples randomly from this buffer and checks the resulting board state, receiving rewards for transitions that lead to a higher total score. This decouples the temporal order of experience from learning, reducing correlation between consecutive updates.
       </p>
 
       <div class="sub-heading">Loss Function</div>
       <div class="formula-block">
-        L(θ) = E[(y − Q(s, a; θ))²]<br>
+        L(θ) = E[(y − Q(s, a; θ))²]<br><br>
         where y = r + γ · max_a' Q(s', a'; θ⁻)
       </div>
-
       <p>
-        The target Q-value <strong>y</strong> is computed using a separate frozen target network (θ⁻), updated periodically. This stabilizes training by preventing the moving target problem inherent in naive Q-learning.
+        The target Q-value <strong>y</strong> is computed using a separate frozen target network (θ⁻), updated periodically. This stabilizes training by preventing the moving target problem inherent in naive Q-learning, where the network would otherwise be chasing a constantly shifting objective. Gradients are backpropagated through the loss to update the online network θ.
       </p>
 
       <div class="sub-heading">Hyperparameters</div>
@@ -576,9 +582,19 @@ title: Status
         <div class="hyperparam-item"><span class="hyperparam-key">total_timesteps</span><span class="hyperparam-val">5,000</span></div>
       </div>
 
+      <div class="sub-heading">Training Curve</div>
+      <div class="eval-img-wrap no-caption" style="margin-bottom: 28px;">
+        <img src="DQNTraining.png" alt="DQN training curve" />
+      </div>
+
       <p>
-        With the default DQN environment, the model does not learn to avoid illegal moves — moves where the board state does not change — and ultimately gets stuck repeating them. Penalizing illegal moves was attempted but the model still lacked memory of <em>why</em> a move was illegal for a given board state. Next steps include adjusting training protocols to mask illegal moves entirely at the action selection stage.
+        With the default DQN environment, the model does not learn to avoid illegal moves — moves where the board state does not change — and ultimately gets stuck repeating them indefinitely. Penalizing illegal moves was attempted, but the model still lacked persistent memory of <em>why</em> a specific move was illegal for a given board state, causing it to repeat the same mistake. The next step is to mask illegal moves entirely at the action selection stage, preventing them from ever being chosen.
       </p>
+
+      <div class="sub-heading">Failure Mode</div>
+      <div class="eval-img-wrap no-caption">
+        <img src="DQNFail.png" alt="DQN stuck on illegal moves" />
+      </div>
     </div>
   </div>
 
@@ -866,7 +882,6 @@ title: Status
         <div class="ai-tag-item">Integrate libraries and dependencies</div>
         <div class="ai-tag-item">Create frontend design for GitHub Pages</div>
         <div class="ai-tag-item">Supplement personal learning of RL models</div>
-        <div class="ai-tag-item">Create game GUI</div>
       </div>
     </div>
   </div>
