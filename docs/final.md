@@ -752,7 +752,7 @@ where  y = r + γ · max_a' Q(s', a'; θ⁻)</div>
       <p class="img-caption">DQN Reward Curve</p>
 
       <div class="eval-img-wrap no-caption">
-        <img src="DQNMaxTile.png" alt="DQN max tile over training" />
+        <img src="DQNMaxTiles.png" alt="DQN max tile over training" />
       </div>
       <p class="img-caption">DQN Max Tile Over Training</p>
 
