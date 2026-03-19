@@ -631,9 +631,6 @@ title: Final Report
     </div>
     <div class="section-body">
       <div class="sub-heading">What is 2048?</div>
-      <p>
-        2048 is a solo player web game where the objective is to merge like tiles to eventually — hopefully — produce the 2048 tile. Each tile is a power of 2, and the player begins with twos and fours scattered across the board.
-      </p>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); margin: 20px 0;">
         <div class="eval-img-wrap no-caption" style="margin: 0;">
@@ -643,6 +640,10 @@ title: Final Report
           <img src="2.png" alt="2048 game example" />
         </div>
       </div>
+
+      <p>
+        2048 is a solo player web game where the objective is to merge like tiles to eventually — hopefully — produce the 2048 tile. Each tile is a power of 2, and the player begins with twos and fours scattered across the board.
+      </p>
 
       <div class="eval-img-wrap no-caption">
         <img src="3.png" alt="2048 gameplay illustration" />
@@ -877,17 +878,20 @@ where  N = total visits to parent node
       </p>
       <p>When ran on our baseline of 20 games, we saw:</p>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); margin: 20px 0;">
-        <div class="eval-img-wrap no-caption" style="margin: 0;">
-          <img src="8.png" alt="MCTS 20-game results 1" />
-        </div>
-        <div class="eval-img-wrap no-caption" style="margin: 0;">
-          <img src="9.png" alt="MCTS 20-game results 2" />
-        </div>
-        <div class="eval-img-wrap no-caption" style="margin: 0;">
-          <img src="10.png" alt="MCTS 20-game results 3" />
-        </div>
-        <div class="eval-img-wrap no-caption" style="margin: 0;">
+      <div class="eval-img-wrap no-caption">
+        <img src="8.png" alt="MCTS 20-game results 1" />
+      </div>
+
+      <div class="eval-img-wrap no-caption">
+        <img src="9.png" alt="MCTS 20-game results 2" />
+      </div>
+
+      <div class="eval-img-wrap no-caption">
+        <img src="10.png" alt="MCTS 20-game results 3" />
+      </div>
+
+      <div style="display: flex; justify-content: center; margin: 24px 0;">
+        <div class="eval-img-wrap no-caption" style="width: 50%; margin: 0;">
           <img src="11.png" alt="MCTS 20-game results 4" />
         </div>
       </div>
@@ -1161,11 +1165,12 @@ w = w - α · m / (√v + ε)      # weight update</div>
         10% of results from a 20-game test end with a max tile of 2048. The average max tile across all 20 games is 1024, and the lowest max tile recorded is 512. Average time per game is approximately 1.5 seconds — at maximum, 3 seconds. This model was trained to approximately 23 million steps. Total testing time for all 20 games is under 30 seconds.
       </p>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); margin: 20px 0;">
-        <div class="eval-img-wrap no-caption" style="margin: 0;">
-          <img src="13.png" alt="PPO results 1" />
-        </div>
-        <div class="eval-img-wrap no-caption" style="margin: 0;">
+      <div class="eval-img-wrap no-caption">
+        <img src="13.png" alt="PPO results — 3 graphs" />
+      </div>
+
+      <div style="display: flex; justify-content: center; margin: 24px 0;">
+        <div class="eval-img-wrap no-caption" style="width: 50%; margin: 0;">
           <img src="14.png" alt="PPO results 2" />
         </div>
       </div>
@@ -1250,20 +1255,22 @@ w = w - α · m / (√v + ε)      # weight update</div>
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); margin: 24px 0;">
-        <div class="eval-img-wrap no-caption" style="margin: 0;">
-          <img src="15.png" alt="Evaluation comparison 1" />
-        </div>
-        <div class="eval-img-wrap no-caption" style="margin: 0;">
-          <img src="16.png" alt="Evaluation comparison 2" />
-        </div>
-        <div class="eval-img-wrap no-caption" style="margin: 0;">
-          <img src="17.png" alt="Evaluation comparison 3" />
-        </div>
+      <div class="eval-img-wrap no-caption">
+        <img src="15.png" alt="Evaluation comparison 1" />
       </div>
 
       <div class="eval-img-wrap no-caption">
-        <img src="18.png" alt="Final evaluation summary" />
+        <img src="16.png" alt="Evaluation comparison 2" />
+      </div>
+
+      <div class="eval-img-wrap no-caption">
+        <img src="17.png" alt="Evaluation comparison 3" />
+      </div>
+
+      <div style="display: flex; justify-content: center; margin: 24px 0;">
+        <div class="eval-img-wrap no-caption" style="width: 50%; margin: 0;">
+          <img src="18.png" alt="Final evaluation summary" />
+        </div>
       </div>
     </div>
   </div>
