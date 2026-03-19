@@ -177,7 +177,7 @@ title: Home
   }
 
   .board-img-wrapper::after {
-    content: 'PPO — 1024 reached';
+    content: 'PPO — 2048 reached';
     position: absolute;
     bottom: 16px;
     left: 16px;
@@ -439,7 +439,7 @@ title: Home
   <div class="hero-tag">CS 175 · UC Irvine · AI Project</div>
   <h1 class="hero-title">The Game of <em>2048</em>,<br>Taught to Think</h1>
   <p class="hero-subtitle">
-    A deep reinforcement learning experiment pitting two algorithms against each other — DQN vs PPO — to see which one masters the art of exponential tile merging.
+    A deep reinforcement learning experiment pitting three algorithms against each other — DQN vs MCTS vs PPO — to see which one masters the art of exponential tile merging.
   </p>
   <div class="hero-cta">
     <a href="final.html" class="btn-primary">↗ Read Final Report</a>
@@ -449,24 +449,24 @@ title: Home
 
 <div class="board-section">
   <div class="board-img-wrapper">
-    <img src="PPO1024.png" alt="PPO agent reaching 1024 tile in 2048" />
+    <img src="19.png" alt="PPO agent reaching 2048 tile in 2048" />
   </div>
   <div class="board-text">
-    <h2>PPO reaches<br><span>tile 1024</span></h2>
+    <h2>PPO reaches<br><span>tile 2048</span></h2>
     <p>
       The Proximal Policy Optimization agent navigates the 4×4 grid through trial and error, learning corner strategies and merge sequences that push tiles to their theoretical maximum.
     </p>
     <div class="stat-row">
       <div class="stat">
-        <span class="stat-value">1024</span>
+        <span class="stat-value">2048</span>
         <span class="stat-label">Best Tile</span>
       </div>
       <div class="stat">
-        <span class="stat-value">PPO</span>
+        <span class="stat-value">MCTS<br>&amp; PPO</span>
         <span class="stat-label">Algorithm</span>
       </div>
       <div class="stat">
-        <span class="stat-value">2</span>
+        <span class="stat-value">3</span>
         <span class="stat-label">Models</span>
       </div>
     </div>
