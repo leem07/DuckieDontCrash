@@ -635,6 +635,19 @@ title: Final Report
         2048 is a solo player web game where the objective is to merge like tiles to eventually — hopefully — produce the 2048 tile. Each tile is a power of 2, and the player begins with twos and fours scattered across the board.
       </p>
 
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); margin: 20px 0;">
+        <div class="eval-img-wrap no-caption" style="margin: 0;">
+          <img src="1.png" alt="2048 game example" />
+        </div>
+        <div class="eval-img-wrap no-caption" style="margin: 0;">
+          <img src="2.png" alt="2048 game example" />
+        </div>
+      </div>
+
+      <div class="eval-img-wrap no-caption">
+        <img src="3.png" alt="2048 gameplay illustration" />
+      </div>
+
       <div class="sub-heading">How to Play</div>
       <p>
         There are 4 possible moves a player can make on any given turn: <strong>up, down, left, right</strong>. After each move, the game adds a random tile (2 or 4) into a random empty cell. Each move slides all existing tiles in the chosen direction. Only when two like tiles — tiles of the same power of two — collide can they merge into one new tile of the next power of two; the two merged tiles disappear and are replaced by their combined value.
@@ -775,11 +788,22 @@ where  y = r + γ · max_a' Q(s', a'; θ⁻)</div>
       <p>
         At each decision point, MCTS expands nodes for different board states and performs rollouts. While traditional MCTS follows fully random rollouts, this naive approach does not account for two key issues: 2048's inherent randomness and its rapidly changing state space. Results from each rollout are backpropagated up through the tree to update node values, allowing the algorithm to estimate which action will yield the best outcome based on the <strong>Upper Confidence Bounds (UCB)</strong> formula:
       </p>
+
+      <div class="eval-img-wrap no-caption">
+        <img src="4.png" alt="MCTS tree diagram" />
+      </div>
+      <p class="img-caption">Graphic via poomstas/2048_MCTS @ github</p>
+
       <div class="formula-block">UCB = exploitation_term + c · sqrt(ln(N) / n)
 
 where  N = total visits to parent node
        n = visits to this child node
        c = exploration constant</div>
+
+      <div class="eval-img-wrap no-caption">
+        <img src="5.png" alt="UCB formula diagram" />
+      </div>
+      <p class="img-caption">Graphic via StackOverflow</p>
 
       <div class="sub-heading">Heuristics</div>
       <p>
@@ -823,6 +847,15 @@ where  N = total visits to parent node
         </div>
       </div>
 
+      <div class="sub-heading">Experimental Findings</div>
+      <p>
+        Based on these heuristics, we could then do experimental analysis to find the best combination of parameters:
+      </p>
+
+      <div class="eval-img-wrap no-caption">
+        <img src="6.png" alt="MCTS heuristic parameter grid search results" />
+      </div>
+
       <div class="sub-heading">Rollout Parameters</div>
       <p>Three rollout parameters were tuned to balance performance against computational cost:</p>
       <div class="hyperparam-grid">
@@ -831,9 +864,33 @@ where  N = total visits to parent node
         <div class="hyperparam-item"><span class="hyperparam-key">Rollout Depth</span><span class="hyperparam-val">max steps</span></div>
         <div class="hyperparam-item"><span class="hyperparam-key">Heuristic weights</span><span class="hyperparam-val">tuned grid</span></div>
       </div>
+
+      <div class="sub-heading">Results</div>
+      <p>This ultimately results in the best combination of parameters which came out to be:</p>
+
+      <div class="eval-img-wrap no-caption">
+        <img src="7.png" alt="MCTS best parameter combination" />
+      </div>
+
       <p>
         More rollouts and deeper rollout depth generally produce higher scores by giving the tree more information — but this directly increases time per game. Games that ran faster (less compute) scored lower because they reached game-over sooner, while slower games running around 8 minutes were able to reach the 2048 tile.
       </p>
+      <p>When ran on our baseline of 20 games, we saw:</p>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); margin: 20px 0;">
+        <div class="eval-img-wrap no-caption" style="margin: 0;">
+          <img src="8.png" alt="MCTS 20-game results 1" />
+        </div>
+        <div class="eval-img-wrap no-caption" style="margin: 0;">
+          <img src="9.png" alt="MCTS 20-game results 2" />
+        </div>
+        <div class="eval-img-wrap no-caption" style="margin: 0;">
+          <img src="10.png" alt="MCTS 20-game results 3" />
+        </div>
+        <div class="eval-img-wrap no-caption" style="margin: 0;">
+          <img src="11.png" alt="MCTS 20-game results 4" />
+        </div>
+      </div>
 
       <div class="sub-heading">Key Insight</div>
       <div class="bug-card">
@@ -858,6 +915,10 @@ where  N = total visits to parent node
       <p>
         The PPO model uses a fully custom training loop with a <strong>CNN + MLP dual-path architecture</strong>. Unlike DQN's off-policy Q-value approach, PPO is an on-policy actor-critic method that directly optimizes a clipped surrogate objective, preventing destructively large policy updates while still making meaningful gradient steps each iteration.
       </p>
+
+      <div class="eval-img-wrap no-caption">
+        <img src="12.png" alt="PPO CNN + MLP architecture diagram" />
+      </div>
 
       <div class="sub-heading">Input Encoding</div>
       <p>
@@ -1099,6 +1160,15 @@ w = w - α · m / (√v + ε)      # weight update</div>
       <p>
         10% of results from a 20-game test end with a max tile of 2048. The average max tile across all 20 games is 1024, and the lowest max tile recorded is 512. Average time per game is approximately 1.5 seconds — at maximum, 3 seconds. This model was trained to approximately 23 million steps. Total testing time for all 20 games is under 30 seconds.
       </p>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); margin: 20px 0;">
+        <div class="eval-img-wrap no-caption" style="margin: 0;">
+          <img src="13.png" alt="PPO results 1" />
+        </div>
+        <div class="eval-img-wrap no-caption" style="margin: 0;">
+          <img src="14.png" alt="PPO results 2" />
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1178,6 +1248,22 @@ w = w - α · m / (√v + ε)      # weight update</div>
             With further research into DQN parameterization and longer training times, we believe there is more to be achieved. DQN's reward plateau currently prevents it from reaching higher tiles, but with more compute and stronger architecture choices (additional layers, larger batch sizes, more timesteps), it could close the gap. More broadly, we can explore imitation learning with additional data, or train existing models on modified 2048 variants — such as including 8 as a randomly spawning tile, using a larger board, or adding move timers — to encourage adaptability.
           </p>
         </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); margin: 24px 0;">
+        <div class="eval-img-wrap no-caption" style="margin: 0;">
+          <img src="15.png" alt="Evaluation comparison 1" />
+        </div>
+        <div class="eval-img-wrap no-caption" style="margin: 0;">
+          <img src="16.png" alt="Evaluation comparison 2" />
+        </div>
+        <div class="eval-img-wrap no-caption" style="margin: 0;">
+          <img src="17.png" alt="Evaluation comparison 3" />
+        </div>
+      </div>
+
+      <div class="eval-img-wrap no-caption">
+        <img src="18.png" alt="Final evaluation summary" />
       </div>
     </div>
   </div>
