@@ -924,6 +924,10 @@ where  N = total visits to parent node
         <img src="12.png" alt="PPO CNN + MLP architecture diagram" />
       </div>
 
+      <div class="eval-img-wrap no-caption">
+        <img src="19.png" alt="PPO 2048 reached" />
+      </div>
+
       <div class="sub-heading">Input Encoding</div>
       <p>
         The board is first <strong>log₂-encoded</strong>: each tile value t is mapped to log₂(t) / 17, compressing the range 2–131072 into a uniform [0, 1] scale. Raw tile values span five orders of magnitude, making them poor direct inputs. Log₂ encoding gives both the convolutional and flat MLP paths equally scaled features to work with.
@@ -1095,6 +1099,11 @@ w = w - α · m / (√v + ε)      # weight update</div>
       </div>
 
       <div class="sub-heading">Issues &amp; Fixes During Training</div>
+
+      <div class="eval-img-wrap no-caption">
+        <img src="20.png" alt="PPO failures before training" />
+      </div>
+
       <div class="bug-list">
         <div class="bug-card">
           <div class="bug-header">
